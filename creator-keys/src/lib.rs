@@ -80,8 +80,10 @@ pub mod fee {
         if total <= 0 {
             return Some((0, 0));
         }
-        let protocol_amount =
-            checked_div_i128(checked_mul_i128(total, protocol_bps as i128)?, BPS_MAX as i128)?;
+        let protocol_amount = checked_div_i128(
+            checked_mul_i128(total, protocol_bps as i128)?,
+            BPS_MAX as i128,
+        )?;
         let creator_amount = total.checked_sub(protocol_amount)?;
         Some((creator_amount, protocol_amount))
     }
