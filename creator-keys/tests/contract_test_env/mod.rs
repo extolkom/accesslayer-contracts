@@ -217,6 +217,7 @@ fn base32_encode(bytes: &[u8]) -> StdString {
     }
 
     encoded
+}
 /// Computes the expected buy price for a given supply value.
 ///
 /// Current bonding curve formula:
