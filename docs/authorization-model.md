@@ -95,6 +95,19 @@ Sells one key held by `seller` for `creator`.
 
 ---
 
+### `transfer_keys(from: Address, to: Address, creator: Address, amount: u32) -> Result<(), ContractError>`
+
+Transfers `amount` keys from `from` to `to` for `creator`. Does not interact with the bonding curve and charges no fee.
+
+- **Auth**: `from.require_auth()` — only the sender authorizes. No recipient approval required.
+- **Rejects**: Self-transfers (`from == to`) with `ContractError::ZeroAddress`.
+- **Fails**: `InsufficientBalance` if `from` holds fewer than `amount` keys.
+- **Fails**: `NotRegistered` if `creator` is not registered.
+- **State changes**: `KeyBalance(creator, from)` decremented, `KeyBalance(creator, to)` incremented. Creator supply and holder_count are unchanged.
+- See [key-transfer-authorization.md](./key-transfer-authorization.md) for full details.
+
+---
+
 ## Open (read-only) functions
 
 These functions require no authorization. Anyone can call them. They do not mutate contract state.
@@ -164,6 +177,7 @@ These functions require no authorization. Anyone can call them. They do not muta
 | `register_creator` | Creator | Yes |
 | `buy_key` | Key holder (buyer) | Yes |
 | `sell_key` | Key holder (seller) | Yes |
+| `transfer_keys` | Key holder (sender / `from`) | Yes |
 | `set_fee_config` | Admin | Yes |
 | `set_key_price` | Admin | Yes |
 | `set_treasury_address` | Admin | Yes |
