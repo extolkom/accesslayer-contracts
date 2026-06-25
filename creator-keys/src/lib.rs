@@ -911,17 +911,18 @@ impl CreatorKeysContract {
             if alloc.amount == 0 {
                 return Err(ContractError::NotPositiveAmount);
             }
-            supply = supply.checked_add(alloc.amount).ok_or(ContractError::Overflow)?;
-            
+            supply = supply
+                .checked_add(alloc.amount)
+                .ok_or(ContractError::Overflow)?;
+
             let locked = LockedAllocation {
                 amount: alloc.amount,
                 unlock_ledger: alloc.unlock_ledger,
                 claimed: false,
             };
-            env.storage().persistent().set(
-                &constants::storage::locked_allocation(&creator),
-                &locked,
-            );
+            env.storage()
+                .persistent()
+                .set(&constants::storage::locked_allocation(&creator), &locked);
             env.events().publish(
                 (events::ALLOCATION_LOCKED_EVENT_NAME, creator.clone()),
                 events::AllocationLockedEvent {
@@ -940,10 +941,9 @@ impl CreatorKeysContract {
             if supply > cap {
                 return Err(ContractError::SupplyCapExceeded);
             }
-            env.storage().persistent().set(
-                &constants::storage::max_supply(&creator),
-                &cap,
-            );
+            env.storage()
+                .persistent()
+                .set(&constants::storage::max_supply(&creator), &cap);
         }
 
         let profile = CreatorProfile {
@@ -968,7 +968,7 @@ impl CreatorKeysContract {
         env.storage()
             .persistent()
             .extend_ttl(&key, current_ledger, extend_to);
-        
+
         env.events().publish(
             events::register_event_topics(&profile.creator),
             events::CreatorRegisteredEvent {
@@ -1116,8 +1116,10 @@ impl CreatorKeysContract {
         env.storage().persistent().set(&balance_key, &new_balance);
         accrue_sell_protocol_fee(&env)?;
 
-        env.events()
-            .publish((events::SELL_EVENT_NAME, creator.clone(), seller), profile.supply);
+        env.events().publish(
+            (events::SELL_EVENT_NAME, creator.clone(), seller),
+            profile.supply,
+        );
 
         // Extend TTL for creator storage after successful sell
         extend_creator_ttl(&env, &creator);
@@ -1792,10 +1794,7 @@ impl CreatorKeysContract {
     ///
     /// Only callable by the creator after the unlock_ledger has been reached.
     /// Transfers the locked keys to the creator's wallet and can only be called once.
-    pub fn claim_locked_allocation(
-        env: Env,
-        creator: Address,
-    ) -> Result<(), ContractError> {
+    pub fn claim_locked_allocation(env: Env, creator: Address) -> Result<(), ContractError> {
         creator.require_auth();
         assert_not_paused(&env)?;
 
@@ -1919,7 +1918,10 @@ impl CreatorKeysContract {
         env.storage().persistent().set(&key, &profile);
 
         env.events().publish(
-            (events::CREATOR_FEE_RECIPIENT_UPDATED_EVENT_NAME, creator.clone()),
+            (
+                events::CREATOR_FEE_RECIPIENT_UPDATED_EVENT_NAME,
+                creator.clone(),
+            ),
             events::CreatorFeeRecipientUpdatedEvent {
                 creator_id: creator,
                 old_recipient: current_recipient,

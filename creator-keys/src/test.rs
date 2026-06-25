@@ -24,7 +24,7 @@ fn test_register_creator_with_locked_allocation() {
     let stored = client.get_locked_allocation(&creator).unwrap();
     assert_eq!(stored.amount, 100);
     assert_eq!(stored.unlock_ledger, 1000);
-    assert_eq!(stored.claimed, false);
+    assert!(!stored.claimed);
 
     let profile = client.get_creator(&creator);
     assert_eq!(profile.supply, 100);
@@ -77,7 +77,7 @@ fn test_claim_locked_allocation_success() {
     client.claim_locked_allocation(&creator);
 
     let stored = client.get_locked_allocation(&creator).unwrap();
-    assert_eq!(stored.claimed, true);
+    assert!(stored.claimed);
 
     let balance = client.get_key_balance(&creator, &creator);
     assert_eq!(balance, 50);
@@ -167,7 +167,7 @@ fn test_get_locked_allocation_returns_allocation_when_set() {
     let result = client.get_locked_allocation(&creator).unwrap();
     assert_eq!(result.amount, 100);
     assert_eq!(result.unlock_ledger, 1000);
-    assert_eq!(result.claimed, false);
+    assert!(!result.claimed);
 }
 
 // --- Max supply cap tests (#394) ---
@@ -276,20 +276,23 @@ fn test_update_protocol_fee_recipient_success() {
     let old_recipient = Address::generate(&env);
     let new_recipient = Address::generate(&env);
 
-    env.storage()
-        .persistent()
-        .set(&constants::storage::ADMIN_ADDRESS, &admin);
-    env.storage()
-        .persistent()
-        .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .set(&constants::storage::ADMIN_ADDRESS, &admin);
+        env.storage()
+            .persistent()
+            .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    });
 
     client.update_protocol_fee_recipient(&admin, &new_recipient);
 
-    let stored = env
-        .storage()
-        .persistent()
-        .get::<DataKey, Address>(&constants::storage::PROTOCOL_FEE_RECIPIENT)
-        .unwrap();
+    let stored = env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .get::<DataKey, Address>(&constants::storage::PROTOCOL_FEE_RECIPIENT)
+            .unwrap()
+    });
     assert_eq!(stored, new_recipient);
 }
 
@@ -304,12 +307,14 @@ fn test_update_protocol_fee_recipient_unauthorized_reverts() {
     let old_recipient = Address::generate(&env);
     let new_recipient = Address::generate(&env);
 
-    env.storage()
-        .persistent()
-        .set(&constants::storage::ADMIN_ADDRESS, &admin);
-    env.storage()
-        .persistent()
-        .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .set(&constants::storage::ADMIN_ADDRESS, &admin);
+        env.storage()
+            .persistent()
+            .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    });
 
     let result = client.try_update_protocol_fee_recipient(&unauthorized, &new_recipient);
     assert_eq!(result, Err(Ok(ContractError::Unauthorized)));
@@ -329,12 +334,14 @@ fn test_update_protocol_fee_recipient_zero_address_reverts() {
     );
     let zero_addr = Address::from_string(&zero_str);
 
-    env.storage()
-        .persistent()
-        .set(&constants::storage::ADMIN_ADDRESS, &admin);
-    env.storage()
-        .persistent()
-        .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .set(&constants::storage::ADMIN_ADDRESS, &admin);
+        env.storage()
+            .persistent()
+            .set(&constants::storage::PROTOCOL_FEE_RECIPIENT, &old_recipient);
+    });
 
     let result = client.try_update_protocol_fee_recipient(&admin, &zero_addr);
     assert_eq!(result, Err(Ok(ContractError::ZeroAddress)));
@@ -377,7 +384,6 @@ fn test_update_creator_fee_recipient_unauthorized_reverts() {
 
 // --- TTL extension tests (#396) ---
 
-
 #[test]
 fn test_register_creator_without_optional_params_succeeds() {
     let env = Env::default();
@@ -395,7 +401,6 @@ fn test_register_creator_without_optional_params_succeeds() {
     assert_eq!(client.get_max_supply(&creator), None);
     assert_eq!(client.get_locked_allocation(&creator), None);
 }
-
 
 #[test]
 fn test_read_key_balance_returns_registered_creator_supply() {

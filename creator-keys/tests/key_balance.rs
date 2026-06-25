@@ -102,7 +102,12 @@ fn test_key_balance_zero_for_unregistered_creator_even_when_other_balances_exist
     let buyer = soroban_sdk::Address::generate(&env);
 
     client.set_key_price(&admin, &100i128);
-    client.register_creator(&registered_creator, &String::from_str(&env, "alice"), &None, &None);
+    client.register_creator(
+        &registered_creator,
+        &String::from_str(&env, "alice"),
+        &None,
+        &None,
+    );
     client.buy_key(&registered_creator, &buyer, &100i128, &None);
 
     assert_eq!(client.get_key_balance(&unregistered_creator, &buyer), 0);
