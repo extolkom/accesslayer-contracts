@@ -40,6 +40,9 @@ pub const SELL_EVENT_NAME: Symbol = symbol_short!("sell");
 /// Event name for key transfer.
 pub const TRANSFER_EVENT_NAME: Symbol = symbol_short!("transfer");
 
+/// Event name for creator buyback.
+pub const BUYBACK_EVENT_NAME: Symbol = symbol_short!("buyback");
+
 /// Common topic indexes for event tuple topics.
 pub const TOPIC_EVENT_NAME_INDEX: u32 = 0;
 pub const TOPIC_CREATOR_INDEX: u32 = 1;
