@@ -1266,7 +1266,7 @@ fn test_transfer_keys_zero_amount_reverts_with_invalid_amount() {
     let from = Address::generate(&env);
     let to = Address::generate(&env);
     let handle = String::from_str(&env, "alice");
-    client.register_creator(&creator, &handle);
+    client.register_creator(&creator, &handle, &None, &None);
 
     let balance_key = constants::storage::key_balance(&creator, &from);
     env.as_contract(&contract_id, || {
@@ -1288,7 +1288,7 @@ fn test_transfer_keys_nonzero_amount_passes_guard() {
     let from = Address::generate(&env);
     let to = Address::generate(&env);
     let handle = String::from_str(&env, "alice");
-    client.register_creator(&creator, &handle);
+    client.register_creator(&creator, &handle, &None, &None);
 
     let balance_key = constants::storage::key_balance(&creator, &from);
     env.as_contract(&contract_id, || {

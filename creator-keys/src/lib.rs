@@ -69,6 +69,10 @@ pub enum ContractError {
     ZeroDistributionAmount = 20,
     NoKeyHolders = 21,
     InvalidAmount = 22,
+    AllocationLocked = 23,
+    AlreadyClaimed = 24,
+    SupplyCapExceeded = 25,
+    InsufficientSupply = 26,
 }
 
 pub mod fee {
